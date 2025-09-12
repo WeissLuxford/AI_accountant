@@ -162,11 +162,10 @@ function renderAll() {
   history.forEach(renderMessage);
   autoscroll(true);
 
-  const welcomeEl = document.getElementById("welcome");
   if (history.length === 0) {
-    welcomeEl.classList.remove("hidden");
+    document.getElementById("welcome").classList.remove("hidden");
   } else {
-    welcomeEl.classList.add("hidden");
+    document.getElementById("welcome").classList.add("hidden");
   }
 }
 
@@ -207,7 +206,11 @@ async function onSend() {
   const text = inputEl.value.trim();
   if (!text) return;
   inputEl.value = "";
+
   addMessage("user", text);
+
+  const welcomeEl = document.getElementById("welcome");
+  if (welcomeEl) welcomeEl.classList.add("hidden");
 
   const placeholder = { role: "assistant", content: "" };
   history.push(placeholder);
@@ -215,7 +218,9 @@ async function onSend() {
   renderMessage(placeholder);
   autoscroll(true);
 
-  const bubble = chatEl.lastElementChild.querySelector(".bubble");
+  const bubbles = chatEl.querySelectorAll(".msg.assistant .bubble");
+  const bubble = bubbles[bubbles.length - 1];
+
   const stopStages = runStages(bubble, stagesArr());
 
   try {
@@ -253,6 +258,7 @@ async function onSend() {
     saveHistory();
   }
 }
+
 
 function clearHistory() {
   history = [];
