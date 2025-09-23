@@ -57,7 +57,7 @@ textarea:focus-visible{outline: 2px solid var(--border); border: none;}
 }
 .msg.user .bubble { border-color: color-mix(in oklab, var(--accent) 40%, var(--border)); }
 .msg.assistant .bubble { border-color: var(--border); }
-.assistant{display: flex; flex-direction: row-reverse;}
+.assistant{display: flex; flex-direction: row-reverse;justify-content: start;}
 
 
 .composer { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
