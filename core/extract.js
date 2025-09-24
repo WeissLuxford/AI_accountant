@@ -1,47 +1,58 @@
-import { openai, MODEL } from "../config/env.js"
-import { four } from "../utils/helpers.js"
+// core/extract.js
 import { parseAmount } from "../utils/parse.js"
 
-export async function extractFields(userText) {
-  const safeUserText = String(userText || "").slice(0, 4000)
-  const r = await openai.responses.create({
-    model: MODEL,
-    input: [
-      { role: "system", content: "Извлекай поля из свободного RU/UZ текста. Ответ только JSON." },
-      { role: "user", content: `Текст: ${safeUserText}\nВерни только JSON со следующими полями:\n{"operation": string,"amount": number|null,"currency": "UZS"|"USD"|"EUR"|"OTHER","payment_method": "r/s"|"cash"|"unknown","vat": "none"|"20%"|"unknown","counterparty_role": string,"documents": string[],"notes": string,"is_about_provodki": boolean,"missing": string[]}\nПравила:\n- Если валюта не указана: UZS\n- Если про НДС ничего: unknown\n- Если способ оплаты не понятен: unknown` }
-    ]
-  })
+/**
+ * Парсинг текста запроса для извлечения ключевых полей.
+ * 
+ * Возвращает объект:
+ * {
+ *   operation: string,
+ *   amount: number|null,
+ *   currency: "UZS"|"USD"|"EUR"|"OTHER",
+ *   payment_method: "r/s"|"cash"|"unknown",
+ *   vat: "none"|"20%"|"unknown",
+ *   is_about_provodki: boolean,
+ *   missing: string[]
+ * }
+ */
+export function extractFields(userText) {
+  const safeUserText = String(userText || "").slice(0, 4000).toLowerCase()
 
-  let obj
-  try { obj = JSON.parse(r.output_text) }
-  catch {
-    obj = {
-      operation: "",
-      amount: null,
-      currency: "UZS",
-      payment_method: "unknown",
-      vat: "unknown",
-      counterparty_role: "unknown",
-      documents: [],
-      notes: safeUserText,
-      is_about_provodki: true,
-      missing: ["parse_error"]
-    }
+  let fx = {
+    operation: safeUserText,
+    amount: null,
+    currency: "UZS",
+    payment_method: "unknown",
+    vat: "unknown",
+    is_about_provodki: true,
+    missing: []
   }
 
-  if (Array.isArray(obj.entries)) {
-    obj.entries = obj.entries.map(e => ({ ...e, debit: four(e.debit), credit: four(e.credit) }))
-  }
-  return obj
-}
-
-export function patchFromShortReply(fx, text) {
-  const t = String(text || "").toLowerCase()
-  const amt = parseAmount(t)
+  // Сумма
+  const amt = parseAmount(safeUserText)
   if (amt !== null) fx.amount = amt
-  if (/касс/.test(t)) fx.payment_method = "cash"
-  if (/(р\/с|расч|банк|перевод|uzcard|humo)/.test(t)) fx.payment_method = "r/s"
-  if (/(без\s*ндс|ндс\s*нет|qqs\s*yo'q)/.test(t)) fx.vat = "none"
-  if (/(ндс\s*20|20%\s*ндс|qqs\s*20)/.test(t)) fx.vat = "20%"
+  else fx.missing.push("amount")
+
+  // Валюта
+  if (/usd|\$/i.test(safeUserText)) fx.currency = "USD"
+  else if (/eur|€/.test(safeUserText)) fx.currency = "EUR"
+  else if (/uzs|сум|so'm/.test(safeUserText)) fx.currency = "UZS"
+  else fx.currency = "UZS" // дефолт
+
+  // Способ оплаты
+  if (/касс|налич/i.test(safeUserText)) fx.payment_method = "cash"
+  else if (/(р\/с|расчет|банк|перевод|uzcard|humo)/i.test(safeUserText)) fx.payment_method = "r/s"
+  else fx.missing.push("payment_method")
+
+  // НДС
+  if (/(без\s*ндс|ндс\s*нет|qqs\s*yo'q)/i.test(safeUserText)) fx.vat = "none"
+  else if (/(ндс\s*20|20%\s*ндс|qqs\s*20)/i.test(safeUserText)) fx.vat = "20%"
+  else fx.missing.push("vat")
+
+  // Операция (действие)
+  if (!/(купил|оплат|зарплат|выдал|получил|продал|списал|аванс|аренд|поручител|возврат)/i.test(safeUserText)) {
+    fx.missing.push("operation")
+  }
+
   return fx
 }

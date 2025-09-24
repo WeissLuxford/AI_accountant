@@ -1,9 +1,12 @@
-// utils/helpers.js
 export const four = a => String(a || "").padStart(4, "0").slice(-4)
 
 export function htmlUnescape(s) {
   if (!s) return s
-  return String(s).replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&")
+  return String(s)
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
 }
 
 export function clamp(n, a, b) {
@@ -26,5 +29,14 @@ export function hasAny(str, regs) {
 }
 
 export function normAccountsInText(text) {
-  return String(text || "").replace(/Дт\s*(\d{1,4})\s*Кт\s*(\d{1,4})/gi, (_m, d, c) => `Дт ${four(d)} Кт ${four(c)}`).replace(/\u2014/g, "-")
+  return String(text || "")
+    .replace(/Дт\s*(\d{1,4})\s*Кт\s*(\d{1,4})/gi, (_m, d, c) => `Дт ${four(d)} Кт ${four(c)}`)
+    .replace(/\u2014/g, "-")
+}
+
+// перенос stripEmDash сюда
+export function stripEmDash(text) {
+  return String(text || "")
+    .replace(/\u2014/g, "-")
+    .replace(/&mdash;/gi, "-")
 }

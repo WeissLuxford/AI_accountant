@@ -26,7 +26,9 @@ export const I18N = {
       "Собираем итоговый вывод..."
     ],
     welcomeTitle: "Добро пожаловать!",
-    welcomeText: "Задайте вопрос по бухгалтерским проводкам.<br>Например: <em>«Оплатили поставщику 2 млн с р/с - какая проводка?»</em>"
+    welcomeText: "Задайте вопрос по бухгалтерским проводкам.<br>Например: <em>«Оплатили поставщику 2 млн с р/с - какая проводка?»</em>",
+    disclaimer: "⚠️ Ассистент может ошибаться. Всю информацию проверяйте самостоятельно перед использованием."
+  
   },
   uz: {
     you: "Siz",
@@ -53,7 +55,9 @@ export const I18N = {
       "Yakuniy xulosani yig'moqdamiz..."
     ],
     welcomeTitle: "Xush kelibsiz!",
-    welcomeText: "Buxgalteriya o'tkazmalari haqida savol bering.<br>Masalan: <em>«Yetkazib beruvchiga 2 mln r/s orqali to'ladik - qaysi o'tkazma?»</em>"
+    welcomeText: "Buxgalteriya o'tkazmalari haqida savol bering.<br>Masalan: <em>«Yetkazib beruvchiga 2 mln r/s orqali to'ladik - qaysi o'tkazma?»</em>",
+    disclaimer: "⚠️ Yordamchi xato qilishi mumkin. Ma'lumotni ishlatishdan oldin o'zingiz tekshiring."
+ 
   }
 }
 
